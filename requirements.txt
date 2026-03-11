@@ -9,4 +9,9 @@ pydantic[email]
 pydantic-settings
 python-multipart
 fastapi-mail
-slowapi    
+slowapi
+
+# testing
+pytest
+pytest-asyncio
+httpx
