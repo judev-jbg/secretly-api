@@ -1,0 +1,173 @@
+# Entorno virtual
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.env/
+.venv/
+virtualenv/
+
+# Variables de entorno y archivos de configuración
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+.env.test
+.env.staging
+config/
+.env.example
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.python-version
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+htmlcov/
+instance/
+
+# IDE y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-workspace
+*.sublime-project
+.vscode-server/
+
+# Base de datos y archivos de datos
+*.db
+*.sqlite
+*.sqlite3
+*.db.sqlite3
+*.db.sqlite
+*.sql
+*.sql.gz
+*.csv
+*.xlsx
+*.xls
+*.parquet
+*.feather
+*.pickle
+
+# Logs y archivos temporales
+logs/
+*.log
+*.log.*
+*.pid
+*.seed
+*.pid.lock
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# Archivos de documentación
+docs/_build/
+site/
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Jupyter Notebooks (si los usas)
+.ipynb_checkpoints/
+*.ipynb
+
+# Docker (si usas contenedores)
+.dockerignore
+Dockerfile
+docker-compose.yml
+docker-compose.override.yml
+*.pid
+
+# Archivos de prueba
+.cache/
+.pytest_cache/
+.tox/
+htmlcov/
+*.cover
+.hypothesis/
+benchmarks/
+
+# Archivos de dependencias
+node_modules/
+bower_components/
+package-lock.json
+yarn.lock
+poetry.lock
+Pipfile.lock
+
+# Archivos específicos de FastAPI
+alembic/versions/
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.manifest
+*.spec
+
+# Archivos de seguridad
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+*.jks
+*.keystore
+secrets/
+secure-*
+
+# Archivos de backup
+*.backup
+*.bak
+*.old
+*.orig
+
+# Archivos de sistema operativo
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+*.lnk
+
+# Archivos de compilación
+*.exe
+*.dll
+*.so
+*.dylib
+*.egg
+*.egg-info/
+dist/
+build/
+*.manifest
+*.spec
