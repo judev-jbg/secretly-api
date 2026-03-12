@@ -17,7 +17,7 @@ from app.schemas.auth import (
 )
 from app.services import auth_service
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 @router.post(
@@ -41,7 +41,8 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     try:
         auth_service.register_user(db, payload)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(e))
     return {"message": "User registered successfully"}
 
 
@@ -130,7 +131,8 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
 
     El token es de un solo uso y expira en 15 minutos.
     """
-    success = auth_service.reset_password(db, payload.token, payload.new_password)
+    success = auth_service.reset_password(
+        db, payload.token, payload.new_password)
     if not success:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

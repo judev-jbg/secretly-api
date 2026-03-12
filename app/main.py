@@ -27,9 +27,9 @@ cifrados **end-to-end** en el cliente. El servidor nunca tiene acceso al conteni
 
 ### Flujo típico
 
-1. Registrar un usuario (`POST /auth/register`) enviando email, contraseña y salt.
-2. Iniciar sesión (`POST /auth/login`) para obtener tokens JWT y el salt.
-3. Usar el `access_token` como Bearer en las peticiones a `/secrets`.
+1. Registrar un usuario (`POST /api/auth/register`) enviando email, contraseña y salt.
+2. Iniciar sesión (`POST /api/auth/login`) para obtener tokens JWT y el salt.
+3. Usar el `access_token` como Bearer en las peticiones a `/api/secrets`.
 4. Crear, leer, actualizar y eliminar secretos cifrados en el vault.
 """
 
@@ -78,13 +78,13 @@ app.include_router(auth.router)
 app.include_router(secrets.router)
 
 
-@app.get("/health", tags=["health"])
+@app.get("/api/health", tags=["health"])
 def health():
     """Verifica que el servicio está activo y respondiendo."""
     return {"status": "ok"}
 
 
-@app.get("/docs", include_in_schema=False)
+@app.get("/api/docs", include_in_schema=False)
 async def scalar_docs():
     """Renderiza la documentación interactiva con Scalar."""
     return get_scalar_api_reference(
