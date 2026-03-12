@@ -56,6 +56,6 @@ def client(db):
 def registered_user(client):
     """Registra un usuario de prueba y retorna sus credenciales."""
     payload = {"email": "test@example.com", "password": "password123", "salt": "c2FsdGJhc2U2NA=="}
-    res = client.post("/auth/register", json=payload)
+    res = client.post("/api/auth/register", json=payload)
     assert res.status_code == 201, res.json()
     return payload

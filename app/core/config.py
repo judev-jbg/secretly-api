@@ -2,6 +2,8 @@
 Todos los valores se cargan desde .env — nunca hardcodear credenciales aquí.
 """
 
+from urllib.parse import quote_plus
+
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -31,7 +33,8 @@ class Settings(BaseSettings):
     sender_password: str = ""
 
     # CORS
-    cors_origins: list[str] = ["http://localhost:5173"]
+    cors_origins: list[str] = [
+        "http://localhost:8080", "http://localhost:5173"]
 
     # Servidor
     port: int = 8100
@@ -40,7 +43,7 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         """URL de conexión a PostgreSQL."""
         return (
-            f"postgresql://{self.db_user}:{self.db_password}"
+            f"postgresql://{quote_plus(self.db_user)}:{quote_plus(self.db_password)}"
             f"@{self.db_host}:{self.db_port}/{self.db_name}"
         )
 
