@@ -31,7 +31,8 @@ class Settings(BaseSettings):
     sender_password: str = ""
 
     # CORS
-    cors_origins: list[str] = ["http://localhost:5173"]
+    cors_origins: list[str] = [
+        "http://localhost:8080", "http://localhost:5173"]
 
     # Servidor
     port: int = 8100
