@@ -9,7 +9,7 @@ from app.core.security import decode_token
 from app.schemas.secret import SecretCreate, SecretUpdate, SecretMeta, SecretDetail
 from app.services import secret_service
 
-router = APIRouter(prefix="/secrets", tags=["secrets"])
+router = APIRouter(prefix="/api/secrets", tags=["secrets"])
 
 bearer = HTTPBearer(description="JWT access token obtenido en `/auth/login`")
 
