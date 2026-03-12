@@ -3,6 +3,8 @@ Usa SQLite en un archivo de test que se recrea antes de cada test.
 """
 
 import os
+from unittest.mock import AsyncMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -47,8 +49,9 @@ def client(db):
         yield db
 
     app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app, raise_server_exceptions=True) as c:
-        yield c
+    with patch("app.services.email_service.fm.send_message", new_callable=AsyncMock):
+        with TestClient(app, raise_server_exceptions=True) as c:
+            yield c
     app.dependency_overrides.clear()
 
 

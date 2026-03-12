@@ -1,6 +1,6 @@
 """Endpoints de autenticación: registro, login, refresh y reset de contraseña."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -16,6 +16,7 @@ from app.schemas.auth import (
     MessageResponse,
 )
 from app.services import auth_service
+from app.services.email_service import send_reset_email
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -104,15 +105,20 @@ def refresh(payload: RefreshRequest, db: Session = Depends(get_db)):
         422: {"description": "Email inválido"},
     },
 )
-def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
+def forgot_password(
+    payload: ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     """
-    Genera un token de reset de contraseña.
+    Genera un token de reset de contraseña y lo envía por email.
 
     Siempre retorna **200 OK** independientemente de si el email existe,
     para no revelar qué cuentas están registradas.
     """
-    auth_service.create_reset_token(db, str(payload.email))
-    # TODO: enviar email con el token cuando se configure SMTP
+    token = auth_service.create_reset_token(db, str(payload.email))
+    if token:
+        background_tasks.add_task(send_reset_email, str(payload.email), token)
     return {"message": "If the email exists, a reset link has been sent"}
 
 
