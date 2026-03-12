@@ -49,8 +49,8 @@ def login_user(db: Session, payload: LoginRequest) -> dict:
         raise ValueError("Invalid credentials")
 
     return {
-        "access_token": create_access_token(user.id),
-        "refresh_token": create_refresh_token(user.id),
+        "access_token": create_access_token(str(user.id)),
+        "refresh_token": create_refresh_token(str(user.id)),
         "salt": user.salt,
     }
 

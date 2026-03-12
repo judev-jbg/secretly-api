@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from sqlalchemy import String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.database import Base
+from app.core.database import Base, StringUUID
 
 
 class User(Base):
@@ -15,7 +15,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[str] = mapped_column(
-        String(36), primary_key=True, default=lambda: str(uuid.uuid4())
+        StringUUID, primary_key=True, default=lambda: str(uuid.uuid4())
     )
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     auth_hash: Mapped[str] = mapped_column(String(255), nullable=False)
