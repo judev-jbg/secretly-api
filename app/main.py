@@ -1,5 +1,7 @@
 """Punto de entrada de la aplicación FastAPI."""
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from scalar_fastapi import get_scalar_api_reference
@@ -8,7 +10,16 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
+from app.core.database import engine, Base
 from app.routers import auth, secrets
+import app.models  # noqa: F401 — registra todos los modelos en Base.metadata
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Crea las tablas al iniciar si no existen (idempotente con checkfirst=True)."""
+    Base.metadata.create_all(bind=engine, checkfirst=True)
+    yield
+
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -49,6 +60,7 @@ TAGS_METADATA = [
 ]
 
 app = FastAPI(
+    lifespan=lifespan,
     title="Secretly API",
     version="1.0.0",
     description=DESCRIPTION,
