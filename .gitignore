@@ -17,7 +17,6 @@ virtualenv/
 .env.test
 .env.staging
 config/
-.env.example
 *.env
 
 # Python

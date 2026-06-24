@@ -23,6 +23,30 @@ cp .env.example .env
 uvicorn app.main:app --host 0.0.0.0 --port 8100
 ```
 
+## Despliegue: Render + Supabase
+
+1. En Supabase, abre **Connect** y copia la cadena de conexión de PostgreSQL. Para Render usa preferentemente el *Shared Pooler* y añade `?sslmode=require` si la URL no lo incluye.
+2. Sube esta rama a tu repositorio y crea en Render un **Web Service** desde ese repositorio. Render detectará [`render.yaml`](render.yaml); acepta el *Blueprint* o usa manualmente los mismos comandos:
+
+   ```text
+   Build command: pip install -r requirements.txt
+   Start command: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+   Health check path: /api/health
+   ```
+
+3. En Render > **Environment**, define estas variables:
+
+   | Variable | Valor |
+   | --- | --- |
+   | `DATABASE_URL` | La URL de Supabase, con `sslmode=require`. |
+   | `SECRET_KEY` | Un valor aleatorio largo. El Blueprint puede generarlo automáticamente. |
+   | `CORS_ORIGINS` | URL(s) del frontend separadas por comas, por ejemplo `https://app.example.com`. |
+   | `SMTP_SERVER`, `SMTP_PORT`, `SENDER_EMAIL`, `SENDER_PASSWORD` | Opcionales; necesarios si habilitas el restablecimiento de contraseña. |
+
+4. Despliega. Comprueba `https://TU-SERVICIO.onrender.com/api/health`; debe responder `{"status":"ok"}`. La documentación quedará en `/api/docs`.
+
+No guardes `DATABASE_URL`, `SECRET_KEY` ni credenciales SMTP en Git. Usa [`.env.example`](.env.example) solo como plantilla local y crea tu propio archivo `.env`.
+
 ### Con PM2
 
 ```bash
@@ -35,7 +59,7 @@ pm2 logs secretly-api
 La documentación interactiva (Scalar) está disponible en:
 
 ```
-http://localhost:8100/docs
+http://localhost:8100/api/docs
 ```
 
 ## Endpoints
