@@ -3,11 +3,12 @@ Usa SQLite en un archivo de test que se recrea antes de cada test.
 """
 
 import os
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 from app.core.database import Base, get_db
@@ -62,3 +63,19 @@ def registered_user(client):
     res = client.post("/api/auth/register", json=payload)
     assert res.status_code == 201, res.json()
     return payload
+
+
+@pytest.fixture
+def database_execute_spy(db, monkeypatch):
+    """Permite comprobar las consultas ejecutadas por el health check."""
+    execute_spy = MagicMock(wraps=db.execute)
+    monkeypatch.setattr(db, "execute", execute_spy)
+    return execute_spy
+
+
+@pytest.fixture
+def unavailable_database(db, monkeypatch):
+    """Simula una base de datos no disponible sin incluir datos sensibles."""
+    execute_mock = MagicMock(side_effect=SQLAlchemyError("database unavailable"))
+    monkeypatch.setattr(db, "execute", execute_mock)
+    return execute_mock

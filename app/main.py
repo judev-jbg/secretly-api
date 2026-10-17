@@ -1,18 +1,26 @@
 """Punto de entrada de la aplicación FastAPI."""
 
 from contextlib import asynccontextmanager
+import logging
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from scalar_fastapi import get_scalar_api_reference
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.database import engine, Base
+from app.core.database import engine, Base, get_db
 from app.routers import auth, secrets
 import app.models  # noqa: F401 — registra todos los modelos en Base.metadata
+
+
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -91,9 +99,18 @@ app.include_router(secrets.router)
 
 
 @app.get("/api/health", tags=["health"])
-def health():
-    """Verifica que el servicio está activo y respondiendo."""
-    return {"status": "ok"}
+def health(db: Session = Depends(get_db)):
+    """Verifica que el servicio y su conexión a la base de datos responden."""
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        logger.error("Database health check failed")
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "database": "unavailable"},
+        )
+
+    return {"status": "ok", "database": "ok"}
 
 
 @app.get("/api/docs", include_in_schema=False)

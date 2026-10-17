@@ -43,7 +43,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8100
    | `CORS_ORIGINS` | URL(s) del frontend separadas por comas, por ejemplo `https://app.example.com`. |
    | `SMTP_SERVER`, `SMTP_PORT`, `SENDER_EMAIL`, `SENDER_PASSWORD` | Opcionales; necesarios si habilitas el restablecimiento de contraseña. |
 
-4. Despliega. Comprueba `https://TU-SERVICIO.onrender.com/api/health`; debe responder `{"status":"ok"}`. La documentación quedará en `/api/docs`.
+4. Despliega. Comprueba `https://TU-SERVICIO.onrender.com/api/health`; debe responder `{"status":"ok","database":"ok"}`. La documentación quedará en `/api/docs`.
 
 No guardes `DATABASE_URL`, `SECRET_KEY` ni credenciales SMTP en Git. Usa [`.env.example`](.env.example) solo como plantilla local y crea tu propio archivo `.env`.
 
@@ -88,7 +88,7 @@ http://localhost:8100/api/docs
 
 | Método | Ruta      | Descripción          |
 |--------|-----------|----------------------|
-| GET    | `/health` | Estado del servicio  |
+| GET    | `/api/health` | Estado del servicio y conexión a la base de datos |
 
 ## Tests
 
