@@ -1,89 +1,79 @@
-"""Esquemas Pydantic para los endpoints de secretos."""
+"""Pydantic schemas for secret endpoints."""
 
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 SecretType = Literal["token", "database", "login", "ssh", "api_key"]
 
 
+def _normalize_alias(value: str) -> str:
+    alias = value.strip()
+    if not alias:
+        raise ValueError("Alias cannot be empty")
+    if len(alias) > 255:
+        raise ValueError("Alias cannot exceed 255 characters")
+    return alias
+
+
 class SecretCreate(BaseModel):
-    """Payload para crear un nuevo secreto."""
-    alias: str = Field(
-        description="Nombre descriptivo del secreto",
-        examples=["AWS Production Key"],
-    )
-    secret_type: SecretType = Field(
-        description="Categoría del secreto",
-        examples=["api_key"],
-    )
-    encrypted: str = Field(
-        description="Contenido del secreto cifrado en el cliente (base64)",
-        examples=["U2FsdGVkX1+vupppZksvRf5pq5g5XjFRIipRkwB0K1Y="],
-    )
-    iv: str = Field(
-        description="Vector de inicialización usado para el cifrado (base64)",
-        examples=["3f8a2b1c4d5e6f7a8b9c0d1e"],
-    )
+    """Encrypted secret creation payload."""
+
+    alias: str
+    secret_type: SecretType
+    encrypted: str
+    iv: str
+
+    @field_validator("alias")
+    @classmethod
+    def normalize_alias(cls, value: str) -> str:
+        return _normalize_alias(value)
 
 
 class SecretUpdate(BaseModel):
-    """Payload para actualizar un secreto existente. Todos los campos son opcionales."""
-    alias: str | None = Field(
-        default=None,
-        description="Nuevo nombre descriptivo",
-        examples=["AWS Staging Key"],
-    )
-    secret_type: SecretType | None = Field(
-        default=None,
-        description="Nueva categoría del secreto",
-        examples=["api_key"],
-    )
-    encrypted: str | None = Field(
-        default=None,
-        description="Nuevo contenido cifrado (base64)",
-        examples=["U2FsdGVkX1+vupppZksvRf5pq5g5XjFRIipRkwB0K1Y="],
-    )
-    iv: str | None = Field(
-        default=None,
-        description="Nuevo vector de inicialización (base64)",
-        examples=["3f8a2b1c4d5e6f7a8b9c0d1e"],
-    )
+    """Editable fields; the original secret type is immutable."""
+
+    alias: str | None = None
+    encrypted: str | None = None
+    iv: str | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+    @field_validator("alias")
+    @classmethod
+    def normalize_alias(cls, value: str | None) -> str | None:
+        return _normalize_alias(value) if value is not None else None
 
 
 class SecretMeta(BaseModel):
-    """Representación pública de un secreto (sin blob cifrado)."""
-    id: str = Field(
-        description="Identificador único del secreto (UUID)",
-        examples=["550e8400-e29b-41d4-a716-446655440000"],
-    )
-    alias: str = Field(
-        description="Nombre descriptivo del secreto",
-        examples=["AWS Production Key"],
-    )
-    secret_type: str = Field(
-        description="Categoría del secreto",
-        examples=["api_key"],
-    )
-    created_at: datetime = Field(
-        description="Fecha y hora de creación",
-    )
-    updated_at: datetime = Field(
-        description="Fecha y hora de última actualización",
-    )
+    """Public secret metadata without encrypted content."""
+
+    id: str
+    alias: str
+    secret_type: str
+    created_at: datetime
+    updated_at: datetime
+    is_locked: bool = False
 
     model_config = {"from_attributes": True}
 
 
 class SecretDetail(SecretMeta):
-    """Representación completa de un secreto (incluye blob cifrado)."""
-    encrypted: str = Field(
-        description="Contenido cifrado del secreto (base64)",
-        examples=["U2FsdGVkX1+vupppZksvRf5pq5g5XjFRIipRkwB0K1Y="],
-    )
-    iv: str = Field(
-        description="Vector de inicialización del cifrado (base64)",
-        examples=["3f8a2b1c4d5e6f7a8b9c0d1e"],
-    )
+    """Secret metadata plus client-encrypted content."""
+
+    encrypted: str
+    iv: str
+
+
+class UnlockTokenRequest(BaseModel):
+    """One-time token delivered by email."""
+
+    token: str = Field(min_length=16, max_length=255)
+
+
+class UnlockAttemptResponse(BaseModel):
+    """Remaining attempts before a security lock."""
+
+    attempts_remaining: int = Field(ge=0, le=2)

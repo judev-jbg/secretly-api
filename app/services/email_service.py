@@ -1,6 +1,7 @@
 """Servicio de envío de emails con fastapi-mail."""
 
 import logging
+from html import escape
 
 from fastapi_mail import FastMail, MessageSchema, MessageType, ConnectionConfig
 
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 conf = ConnectionConfig(
     MAIL_USERNAME=settings.sender_email,
     MAIL_PASSWORD=settings.sender_password,
-    MAIL_FROM=settings.sender_email,
+    MAIL_FROM=settings.sender_email or "noreply@example.com",
     MAIL_PORT=settings.smtp_port,
     MAIL_SERVER=settings.smtp_server,
     MAIL_STARTTLS=True,
@@ -53,3 +54,29 @@ async def send_reset_email(email: str, token: str) -> None:
         logger.info("Email de reset enviado correctamente a %s", email)
     except Exception as e:
         logger.error("Error al enviar email de reset a %s: %s", email, e)
+
+
+async def send_secret_unlock_email(email: str, alias: str, token: str) -> None:
+    """Send a one-time token after a secret reaches the failure limit."""
+    if not settings.smtp_server or not settings.sender_email:
+        logger.warning("SMTP not configured - unlock email not sent to %s", email)
+        return
+
+    try:
+        message = MessageSchema(
+            subject="Secretly - Secreto bloqueado por seguridad",
+            recipients=[email],
+            body=(
+                "<h3>Un secreto ha sido bloqueado</h3>"
+                f"<p>Alias: <strong>{escape(alias)}</strong></p>"
+                "<p>Usa este token de un solo uso para iniciar el desbloqueo:</p>"
+                f"<p><strong>{token}</strong></p>"
+                f"<p>Expira en {settings.secret_unlock_token_expire_minutes} minutos.</p>"
+                "<p>Después deberás validar tu PIN y frase en Secretly.</p>"
+            ),
+            subtype=MessageType.html,
+        )
+        await fm.send_message(message)
+        logger.info("Secret unlock email sent to %s", email)
+    except Exception as exc:
+        logger.error("Error sending secret unlock email to %s: %s", email, exc)

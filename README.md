@@ -82,7 +82,20 @@ http://localhost:8100/api/docs
 | GET    | `/secrets/{id}`       | Obtener secreto con blob cifrado  |
 | POST   | `/secrets`            | Crear secreto                     |
 | PUT    | `/secrets/{id}`       | Actualizar secreto                |
-| DELETE | `/secrets/{id}`       | Eliminar secreto                  |
+| DELETE | `/secrets/{id}`       | Eliminar lógicamente un secreto   |
+| POST   | `/secrets/{id}/restore` | Restaurar durante la ventana Undo |
+| POST   | `/secrets/{id}/unlock-failure` | Registrar un desbloqueo fallido |
+| POST   | `/secrets/{id}/unlock-success` | Reiniciar intentos tras desbloquear |
+| POST   | `/secrets/{id}/unlock` | Validar el token recibido por email |
+
+Los alias son únicos por usuario entre secretos activos, ignorando mayúsculas y
+espacios exteriores. El tipo de un secreto no puede modificarse. Al tercer fallo
+de desbloqueo se bloquea el acceso al blob cifrado y se envía un token de un solo
+uso con la configuración SMTP existente.
+
+El arranque aplica de forma idempotente las columnas e índice necesarios para
+instalaciones existentes. Si ya existen alias duplicados para un mismo usuario,
+deben corregirse antes del despliegue para poder crear el índice único.
 
 ### Health
 

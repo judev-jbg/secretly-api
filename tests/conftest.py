@@ -66,6 +66,33 @@ def registered_user(client):
 
 
 @pytest.fixture
+def secret_payload_factory():
+    """Construye payloads cifrados válidos sin compartir estado entre tests."""
+    def factory(alias="mi-token", secret_type="token"):
+        return {
+            "alias": alias,
+            "secret_type": secret_type,
+            "encrypted": "Y2lwaGVydGV4dGJhc2U2NA==",
+            "iv": "aXZiYXNlNjQ=",
+        }
+
+    return factory
+
+
+@pytest.fixture
+def other_registered_user(client):
+    """Registra un segundo usuario para comprobar aislamiento entre cuentas."""
+    payload = {
+        "email": "other@example.com",
+        "password": "password456",
+        "salt": "b3RoZXJzYWx0YmFzZTY0",
+    }
+    response = client.post("/api/auth/register", json=payload)
+    assert response.status_code == 201, response.json()
+    return payload
+
+
+@pytest.fixture
 def database_execute_spy(db, monkeypatch):
     """Permite comprobar las consultas ejecutadas por el health check."""
     execute_spy = MagicMock(wraps=db.execute)
