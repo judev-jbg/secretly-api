@@ -25,6 +25,7 @@ class Settings(BaseSettings):
 
     # Password reset
     reset_token_expire_minutes: int = 15
+    secret_unlock_token_expire_minutes: int = 15
 
     # Email
     smtp_server: str = ""

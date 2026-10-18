@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import engine, Base, get_db
+from app.core.schema_migrations import migrate_secret_lifecycle
 from app.routers import auth, secrets
 import app.models  # noqa: F401 — registra todos los modelos en Base.metadata
 
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Crea las tablas al iniciar si no existen (idempotente con checkfirst=True)."""
     Base.metadata.create_all(bind=engine, checkfirst=True)
+    migrate_secret_lifecycle(engine)
     yield
 
 
